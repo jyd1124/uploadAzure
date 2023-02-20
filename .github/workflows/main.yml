@@ -1,0 +1,29 @@
+name: Blob storage CI
+
+on:
+    push:
+        branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: azure/login@v1
+      with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Upload to pvc
+      uses: azure/CLI@v1
+      with:
+        inlineScript: |
+            az storage file upload-batch --destination pvc-530887c4-b503-4563-9a02-06c736555b45 \
+                                         --source ./test \
+                                         --account-name myaccount \
+                                         --connection-string DefaultEndpointsProtocol=https;AccountName=f2d678f5472fb48d592d7b1;AccountKey=0VVu/xoZh/U6KDmNmmcNrrfd1V6X66ClQn3kiRPxH1P2cWB2czTjtG0J9gEQfdIWXPGJvt7Yo+4A+AStB6m/HQ==;EndpointSuffix=core.windows.net
+
+  # Azure logout
+    - name: logout
+      run: |
+            az logout
+      if: always()
